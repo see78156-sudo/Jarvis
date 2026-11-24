@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07131f">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<title>Jarvis AI</title>
+<style>
+  :root { --bg:#07131f; --ink:#d8f3ff; --dim:#6f93a8; --cyan:#3fd8ff; --line:#14405a; --card:#0d2a3d; --bar:#0b1f2f; }
+  * { box-sizing:border-box; }
+  html,body { height:100%; margin:0; }
+  body { background:var(--bg); color:var(--ink); font-family:system-ui,"Segoe UI",Tahoma,sans-serif;
+         display:flex; flex-direction:column; height:100dvh;
+         padding-top:env(safe-area-inset-top,0px); }
+  header { display:flex; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid var(--line); }
+  .core { width:34px; height:34px; border-radius:50%; border:2px solid var(--cyan); position:relative; flex:none;
+          box-shadow:0 0 14px #3fd8ff66; }
+  .core::after { content:""; position:absolute; inset:9px; border-radius:50%; background:var(--cyan); }
+  .core.busy::after { animation:pulse .8s ease-in-out infinite; }
+  @keyframes pulse { 50% { transform:scale(1.5); opacity:.6; } }
+  @media (prefers-reduced-motion:reduce) { .core.busy::after { animation:none; } }
+  h1 { font-size:18px; margin:0; letter-spacing:.5px; }
+  #log { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px; }
+  .m { padding:10px 14px; border-radius:12px; max-width:88%; line-height:1.8; font-size:17px; white-space:pre-wrap; overflow-wrap:anywhere; }
+  .me { align-self:flex-start; background:var(--card); border:1px solid var(--line); }
+  .ai { align-self:flex-end; border:1px solid var(--cyan); }
+  .bar { display:flex; gap:8px; padding:12px 12px calc(12px + env(safe-area-inset-bottom,0px)); background:var(--bar); }
+  input[type=text] { flex:1; min-width:0; padding:12px; border-radius:10px; border:1px solid var(--line);
+                     background:var(--bg); color:var(--ink); font-size:16px; }
+  button { padding:12px 16px; border:0; border-radius:10px; background:var(--cyan); color:#032033; font-weight:700; font-size:16px; }
+  button.ghost { background:transparent; color:var(--cyan); border:1px solid var(--cyan); }
+  button:focus-visible, input:focus-visible { outline:3px solid #fff; outline-offset:2px; }
+  label { display:flex; align-items:center; gap:4px; font-size:14px; color:var(--dim); }
+</style>
+</head>
+<body>
+<header>
+  <div class="core" id="core"></div>
+  <h1>Jarvis AI</h1>
+</header>
+<div id="log" aria-live="polite"></div>
+<div class="bar">
+  <button id="mic" aria-label="تحدث">🎤</button>
+  <input id="t" type="text" placeholder="اكتب لجارفيس..." autocomplete="off">
+  <button id="go">إرسال</button>
+  <button id="clr" class="ghost">مسح</button>
+  <label><input id="sp" type="checkbox"> صوت</label>
+</div>
+
+<script>
+const log = document.getElementById("log"), t = document.getElementById("t"),
+      sp = document.getElementById("sp"), core = document.getElementById("core");
+let busy = false;
+
+function sid() {
+  let s = "";
+  try { s = localStorage.getItem("jid") || ""; } catch (e) {}
+  if (!s) {
+    s = Math.random().toString(36).slice(2) + Date.now().toString(36);
+    try { localStorage.setItem("jid", s); } catch (e) {}
+  }
+  return s;
+}
+const SID = sid();
+
+function add(cls, text) {
+  const d = document.createElement("div");
+  d.className = "m " + cls; d.textContent = text;
+  log.appendChild(d); log.scrollTop = log.scrollHeight;
+  return d;
+}
+
+function welcome() {
+  add("ai", "أهلاً بك في جارفيس، كيف يمكنني مساعدتك اليوم؟\nتم تطويري على يد المطور المبدع سيف إسلام، صاحب الفكرة والإصرار اللي حوّلني من حلم لحقيقة.");
+}
+welcome();
+
+async function send() {
+  const x = t.value.trim();
+  if (!x || busy) return;
+  busy = true; core.classList.add("busy");
+  t.value = ""; add("me", x);
+  const w = add("ai", "...");
+  try {
+    const r = await fetch("/chat", { method: "POST", headers: { "Content-Type": "application/json" },
+                                     body: JSON.stringify({ sid: SID, text: x }) });
+    const rd = r.body.getReader(), dec = new TextDecoder();
+    let full = "";
+    while (true) {
+      const { done, value } = await rd.read();
+      if (done) break;
+      full += dec.decode(value, { stream: true });
+      w.textContent = full; log.scrollTop = log.scrollHeight;
+    }
+    if (!full) w.textContent = "مفيش رد";
+    if (full && r.ok && sp.checked) {
+      const u = new SpeechSynthesisUtterance(full); u.lang = "ar-EG";
+      speechSynthesis.cancel(); speechSynthesis.speak(u);
+    }
+  } catch (e) {
+    w.textContent = "مفيش اتصال بالسيرفر";
+  }
+  busy = false; core.classList.remove("busy");
+}
+
+document.getElementById("go").onclick = send;
+t.addEventListener("keydown", e => { if (e.key === "Enter") send(); });
+document.getElementById("clr").onclick = async () => {
+  try { await fetch("/reset", { method: "POST", headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ sid: SID }) }); } catch (e) {}
+  log.innerHTML = ""; welcome();
+};
+
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+document.getElementById("mic").onclick = () => {
+  if (!SR) { alert("المتصفح ده مش بيدعم التعرف على الصوت. استخدم Chrome."); return; }
+  const r = new SR(); r.lang = "ar-EG";
+  r.onresult = e => { t.value = e.results[0][0].transcript; send(); };
+  r.start();
+};
+
+if ("serviceWorker" in navigator) { navigator.serviceWorker.register("/sw.js").catch(() => {}); }
+</script>
+</body>
+</html>
