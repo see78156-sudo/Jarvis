@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07131f">
+<meta name="color-scheme" content="dark">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<title>Jarvis AI</title>
+<style>
+  :root { color-scheme:dark; --bg:#07131f; --ink:#d8f3ff; --dim:#6f93a8; --cyan:#3fd8ff; --blue:#2b7bff; --line:#14405a; --card:#0d2a3d; --bar:#0b1f2f; }
+  * { box-sizing:border-box; }
+  html,body { height:100%; margin:0; }
+  body { background:var(--bg); color:var(--ink); font-family:system-ui,"Segoe UI",Tahoma,sans-serif; height:100dvh; }
+  #app { display:flex; flex-direction:column; height:100%; padding-top:env(safe-area-inset-top,0px); }
+  #app[hidden], #auth[hidden], [hidden] { display:none !important; }
+  header { display:flex; align-items:center; gap:12px; padding:10px 16px; border-bottom:1px solid var(--line); }
+  .core { width:34px; height:34px; border-radius:50%; border:2px solid var(--cyan); position:relative; flex:none; box-shadow:0 0 14px #3fd8ff66; }
+  .core::after { content:""; position:absolute; inset:9px; border-radius:50%; background:var(--cyan); }
+  .core.busy::after { animation:pulse .8s ease-in-out infinite; }
+  @keyframes pulse { 50% { transform:scale(1.5); opacity:.6; } }
+  @media (prefers-reduced-motion:reduce) { .core.busy::after { animation:none; } }
+  h1 { font-size:18px; margin:0; letter-spacing:.5px; flex:1; }
+  .tools { display:flex; align-items:center; gap:10px; }
+  label { display:flex; align-items:center; gap:4px; font-size:14px; color:var(--dim); }
+  #log { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px; }
+  .m { padding:10px 14px; border-radius:14px; max-width:88%; line-height:1.8; font-size:17px; white-space:pre-wrap; overflow-wrap:anywhere; }
+  .me { align-self:flex-start; background:var(--card); border:1px solid var(--line); }
+  .ai { align-self:flex-end; border:1px solid var(--cyan); }
+  .m img { display:block; max-width:100%; max-height:220px; border-radius:8px; margin-bottom:8px; }
+  .m .file { display:block; color:var(--cyan); font-size:15px; margin-bottom:6px; }
+  #note { padding:0 16px; font-size:14px; color:#ffb347; }
+  #note:empty { display:none; }
+
+  /* صندوق الكتابة */
+  .wrap { padding:8px 12px calc(12px + env(safe-area-inset-bottom,0px)); }
+  .composer { max-width:780px; margin:0 auto; background:var(--bar); border:1px solid var(--line); border-radius:26px;
+              padding:10px 12px 10px; transition:border-color .15s, box-shadow .15s; }
+  .composer:focus-within { border-color:var(--cyan); box-shadow:0 0 0 3px #3fd8ff1f, 0 0 24px #3fd8ff33; }
+  #chips { display:flex; gap:8px; overflow-x:auto; padding-bottom:8px; }
+  #chips:empty { display:none; }
+  .chip { flex:none; display:flex; align-items:center; gap:6px; padding:6px 8px 6px 10px; border:1px solid var(--line);
+          border-radius:12px; background:var(--bg); font-size:13px; max-width:190px; }
+  .chip img { width:40px; height:40px; object-fit:cover; border-radius:8px; }
+  .chip span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .chip button { padding:0 6px; background:transparent; color:#ff7b7b; font-size:18px; line-height:1; border:0; }
+  textarea { display:block; width:100%; resize:none; background:transparent; border:0; outline:0; color:var(--ink);
+             font:inherit; font-size:17px; line-height:1.6; max-height:140px; padding:6px 4px; }
+  textarea::placeholder { color:var(--dim); }
+  .row { display:flex; align-items:center; gap:8px; margin-top:6px; }
+  .ic, .send { width:42px; height:42px; padding:0; border-radius:50%; display:grid; place-items:center; flex:none; }
+  .ic { background:transparent; color:var(--cyan); border:1px solid var(--line); }
+  .ic:active { background:#0d2a3d; }
+  .send { margin-inline-start:auto; background:#123a52; color:#7fa8bd; transition:background .15s, color .15s, box-shadow .15s; }
+  .send.on { background:linear-gradient(135deg,var(--cyan),var(--blue)); color:#032033; box-shadow:0 0 16px #3fd8ff66; }
+  svg { display:block; }
+  .attach { position:relative; }
+  #menu { position:absolute; bottom:125%; inset-inline-start:0; display:flex; flex-direction:column; gap:2px; padding:8px;
+          background:var(--card); border:1px solid var(--cyan); border-radius:14px; z-index:5; min-width:190px; box-shadow:0 8px 28px #000a; }
+  #menu button { text-align:start; background:transparent; color:var(--ink); border:0; padding:11px 10px; font-weight:500; font-size:16px; border-radius:8px; }
+  #menu button:active { background:#14405a; }
+  button { padding:12px 16px; border:0; border-radius:10px; background:var(--cyan); color:#032033; font-weight:700; font-size:16px; }
+  button.ghost { background:transparent; color:var(--cyan); border:1px solid var(--cyan); padding:6px 12px; font-size:14px; }
+  button:focus-visible, textarea:focus-visible, input:focus-visible { outline:3px solid #fff; outline-offset:2px; }
+
+  /* شاشة التسجيل */
+  #auth { position:fixed; inset:0; display:grid; place-items:center; padding:20px; overflow-y:auto;
+          background:radial-gradient(ellipse at 50% 0%, #0d2a3d 0%, var(--bg) 65%); }
+  .authcard { width:min(92vw,400px); background:var(--bar); border:1px solid var(--line); border-radius:24px; padding:26px 22px;
+              display:flex; flex-direction:column; gap:12px; box-shadow:0 0 40px #3fd8ff22; text-align:center; }
+  .authcard .core { width:64px; height:64px; margin:0 auto; }
+  .authcard .core::after { inset:18px; }
+  .authcard h2 { margin:4px 0 0; font-size:24px; letter-spacing:.5px; }
+  .authcard .sub { margin:0; color:var(--dim); font-size:15px; }
+  .tabs { display:flex; gap:6px; background:var(--bg); border:1px solid var(--line); border-radius:12px; padding:4px; }
+  .tab { flex:1; background:transparent; color:var(--dim); padding:10px; font-size:15px; border-radius:9px; }
+  .tab.on { background:linear-gradient(135deg,var(--cyan),var(--blue)); color:#032033; }
+  .authcard input { width:100%; padding:13px 14px; border-radius:12px; border:1px solid var(--line); background:var(--bg); color:var(--ink); font-size:16px; text-align:start; }
+  .authcard input:focus { border-color:var(--cyan); }
+  .primary { background:linear-gradient(135deg,var(--cyan),var(--blue)); color:#032033; padding:14px; border-radius:12px; font-size:17px; box-shadow:0 0 16px #3fd8ff44; }
+  .primary:disabled { opacity:.6; }
+  .link { background:transparent; color:var(--cyan); font-weight:500; font-size:14px; padding:6px; }
+  #amsg { min-height:22px; font-size:14px; line-height:1.6; color:#ff8a8a; }
+  #amsg.ok { color:#6fe3a0; }
+  .by { margin:0; color:var(--dim); font-size:12px; }
+</style>
+</head>
+<body>
+
+<div id="auth" hidden>
+  <div class="authcard">
+    <div class="core"></div>
+    <h2>Jarvis AI</h2>
+    <p class="sub">سجّل دخولك عشان تبدأ</p>
+    <div class="tabs">
+      <button id="tLogin" class="tab on" type="button">تسجيل دخول</button>
+      <button id="tReg" class="tab" type="button">حساب جديد</button>
+    </div>
+    <input id="em" type="email" dir="ltr" placeholder="الإيميل" autocomplete="email" inputmode="email">
+    <input id="pw" type="password" dir="ltr" placeholder="كلمة السر" autocomplete="current-password">
+    <button id="submit" class="primary" type="button">دخول</button>
+    <div id="amsg" role="alert"></div>
+    <button id="forgot" class="link" type="button">نسيت كلمة السر؟</button>
+    <p class="by">تطوير سيف إسلام</p>
+  </div>
+</div>
+
+<div id="app" hidden>
+  <header>
+    <div class="core" id="core"></div>
+    <h1>Jarvis AI</h1>
+    <div class="tools">
+      <label><input id="sp" type="checkbox"> صوت</label>
+      <button id="clr" class="ghost">مسح</button>
+      <button id="out" class="ghost" hidden>خروج</button>
+    </div>
+  </header>
+  <div id="log" aria-live="polite"></div>
+  <div id="note"></div>
+  <div class="wrap">
+    <div class="composer">
+      <div id="chips"></div>
+      <textarea id="t" rows="1" placeholder="اسأل جارفيس..." enterkeyhint="send" autocomplete="off"></textarea>
+      <div class="row">
+        <div class="attach">
+          <button id="plus" class="ic" aria-label="إرفاق صورة أو ملف">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+          <div id="menu" hidden>
+            <button data-k="cam">📷 كاميرا</button>
+            <button data-k="img">🖼️ صورة من المعرض</button>
+            <button data-k="file">📄 ملف (PDF أو نص)</button>
+          </div>
+        </div>
+        <button id="mic" class="ic" aria-label="تحدث">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/><path d="M19 11a7 7 0 0 1-14 0M12 18v3"/></svg>
+        </button>
+        <button id="go" class="send" aria-label="إرسال">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<input type="file" id="fCam" accept="image/*" capture="environment" hidden>
+<input type="file" id="fImg" accept="image/*" multiple hidden>
+<input type="file" id="fFile" accept=".pdf,.txt,.md,.csv,.json,.xml,.yaml,.yml,.log,.py,.js,.html,.css,text/*,application/pdf" multiple hidden>
+
+<script>
+const $ = id => document.getElementById(id);
+const log = $("log"), t = $("t"), sp = $("sp"), core = $("core"), chips = $("chips"), menu = $("menu"), goBtn = $("go");
+const MAX_FILES = 3, MAX_B64 = 7 * 1024 * 1024;
+let busy = false, atts = [], started = false;
+let CFG = { authEnabled: false, apiKey: "", requireVerified: false };
+let tok = { id: "", refresh: "", exp: 0 };
+
+function lsGet(k) { try { return localStorage.getItem(k) || ""; } catch (e) { return ""; } }
+function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+function lsDel(k) { try { localStorage.removeItem(k); } catch (e) {} }
+
+function sid() {
+  let s = lsGet("jid");
+  if (!s) { s = Math.random().toString(36).slice(2) + Date.now().toString(36); lsSet("jid", s); }
+  return s;
+}
+const SID = sid();
+
+/* ---------- تسجيل الدخول (Firebase Auth عن طريق REST) ---------- */
+const FB = "https://identitytoolkit.googleapis.com/v1/accounts:";
+async function fb(path, body) {
+  const r = await fetch(FB + path + "?key=" + encodeURIComponent(CFG.apiKey), {
+    method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error((j.error && j.error.message) || "ERROR");
+  return j;
+}
+function setTok(id, refresh, expiresIn) {
+  tok = { id: id, refresh: refresh, exp: Date.now() + (parseInt(expiresIn, 10) - 90) * 1000 };
+  lsSet("jrt", refresh);
+}
+async function refreshTok() {
+  const rt = tok.refresh || lsGet("jrt");
+  if (!rt) return false;
+  try {
+    const r = await fetch("https://securetoken.googleapis.com/v1/token?key=" + encodeURIComponent(CFG.apiKey), {
+      method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: "grant_type=refresh_token&refresh_token=" + encodeURIComponent(rt) });
+    if (!r.ok) return false;
+    const j = await r.json();
+    setTok(j.id_token, j.refresh_token, j.expires_in);
+    return true;
+  } catch (e) { return false; }
+}
+async function getToken() {            // "" = التسجيل مقفول، null = لازم يسجل دخول
+  if (!CFG.authEnabled) return "";
+  if (!tok.id || Date.now() > tok.exp) { if (!(await refreshTok())) return null; }
+  return tok.id;
+}
+function signOut() { tok = { id: "", refresh: "", exp: 0 }; lsDel("jrt"); showAuth(); }
+function authHeaders() {
+  const h = { "Content-Type": "application/json" };
+  if (CFG.authEnabled && tok.id) h["Authorization"] = "Bearer " + tok.id;
+  return h;
+}
+
+const ERR = [
+  ["EMAIL_EXISTS", "الإيميل ده مسجّل قبل كده. جرّب تسجيل الدخول."],
+  ["INVALID_LOGIN_CREDENTIALS", "الإيميل أو كلمة السر غلط."],
+  ["INVALID_PASSWORD", "الإيميل أو كلمة السر غلط."],
+  ["EMAIL_NOT_FOUND", "الإيميل أو كلمة السر غلط."],
+  ["INVALID_EMAIL", "اكتب إيميل صحيح."],
+  ["MISSING_EMAIL", "اكتب الإيميل."],
+  ["MISSING_PASSWORD", "اكتب كلمة السر."],
+  ["WEAK_PASSWORD", "كلمة السر ضعيفة. لازم 6 حروف على الأقل."],
+  ["TOO_MANY_ATTEMPTS", "محاولات كتير. استنى شوية وجرّب تاني."],
+  ["USER_DISABLED", "الحساب ده متوقف."],
+  ["OPERATION_NOT_ALLOWED", "التسجيل بالإيميل مش متفعّل في Firebase لسه."],
+  ["API_KEY", "مفتاح Firebase غلط. راجع الإعدادات."]
+];
+function arErr(m) { m = String(m || ""); for (const [k, v] of ERR) if (m.indexOf(k) === 0 || m.indexOf(k) > -1) return v; return "حصل خطأ. جرّب تاني."; }
+
+let mode = "login";
+function setMode(m) {
+  mode = m;
+  $("tLogin").classList.toggle("on", m === "login");
+  $("tReg").classList.toggle("on", m === "register");
+  $("submit").textContent = m === "login" ? "دخول" : "إنشاء الحساب";
+  $("pw").autocomplete = m === "login" ? "current-password" : "new-password";
+  $("pw").placeholder = m === "login" ? "كلمة السر" : "كلمة السر (6 حروف على الأقل)";
+  $("forgot").hidden = m !== "login";
+  amsg("");
+}
+function amsg(text, ok) { const e = $("amsg"); e.textContent = text; e.className = ok ? "ok" : ""; }
+
+async function submitAuth() {
+  const email = $("em").value.trim(), pw = $("pw").value;
+  if (!email || !pw) { amsg("اكتب الإيميل وكلمة السر."); return; }
+  const btn = $("submit"); btn.disabled = true; amsg("");
+  try {
+    if (mode === "register") {
+      const j = await fb("signUp", { email: email, password: pw, returnSecureToken: true });
+      if (CFG.requireVerified) {
+        await fb("sendOobCode", { requestType: "VERIFY_EMAIL", idToken: j.idToken });
+        setMode("login"); amsg("اتبعتلك إيميل تفعيل. افتحه وبعدين سجّل دخول.", true);
+      } else { setTok(j.idToken, j.refreshToken, j.expiresIn); $("pw").value = ""; showApp(); }
+    } else {
+      const j = await fb("signInWithPassword", { email: email, password: pw, returnSecureToken: true });
+      setTok(j.idToken, j.refreshToken, j.expiresIn); $("pw").value = ""; showApp();
+    }
+  } catch (e) { amsg(arErr(e.message)); }
+  btn.disabled = false;
+}
+$("tLogin").onclick = () => setMode("login");
+$("tReg").onclick = () => setMode("register");
+$("submit").onclick = submitAuth;
+["em", "pw"].forEach(id => $(id).addEventListener("keydown", e => { if (e.key === "Enter") submitAuth(); }));
+$("forgot").onclick = async () => {
+  const email = $("em").value.trim();
+  if (!email) { amsg("اكتب الإيميل الأول وبعدين دوس هنا."); return; }
+  try { await fb("sendOobCode", { requestType: "PASSWORD_RESET", email: email }); amsg("اتبعتلك رابط تغيير كلمة السر على الإيميل.", true); }
+  catch (e) { amsg(arErr(e.message)); }
+};
+$("out").onclick = signOut;
+
+function showAuth() { $("app").hidden = true; $("auth").hidden = false; setMode(mode); }
+function showApp() {
+  $("auth").hidden = true; $("app").hidden = false;
+  $("out").hidden = !CFG.authEnabled;
+  if (!started) { started = true; welcome(); }
+}
+
+/* ---------- الرسايل ---------- */
+function add(cls, text, files) {
+  const d = document.createElement("div");
+  d.className = "m " + cls;
+  (files || []).forEach(f => {
+    if (f.thumb) { const im = document.createElement("img"); im.src = f.thumb; im.alt = f.name; d.appendChild(im); }
+    else { const s = document.createElement("span"); s.className = "file"; s.textContent = "📄 " + f.name; d.appendChild(s); }
+  });
+  if (text) d.appendChild(document.createTextNode(text));
+  log.appendChild(d); log.scrollTop = log.scrollHeight;
+  return d;
+}
+function welcome() {
+  add("ai", "أهلاً بك في جارفيس، كيف يمكنني مساعدتك اليوم؟\nتم تطويري على يد المطور المبدع سيف إسلام، صاحب الفكرة والإصرار اللي حوّلني من حلم لحقيقة.\nتقدر تبعتلي صورة أو تصوّر بالكاميرا أو ترفع ملف PDF بزرار ＋.");
+}
+let noteTimer;
+function note(msg) {
+  $("note").textContent = msg;
+  clearTimeout(noteTimer);
+  noteTimer = setTimeout(() => { $("note").textContent = ""; }, 5000);
+}
+
+/* ---------- صندوق الكتابة ---------- */
+function fit() { t.style.height = "auto"; t.style.height = Math.min(t.scrollHeight, 140) + "px"; }
+function upd() { goBtn.classList.toggle("on", !!(t.value.trim() || atts.length)); }
+t.addEventListener("input", () => { fit(); upd(); });
+t.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } });
+
+/* ---------- المرفقات ---------- */
+function renderChips() {
+  chips.innerHTML = "";
+  atts.forEach((a, i) => {
+    const c = document.createElement("div"); c.className = "chip";
+    if (a.thumb) { const im = document.createElement("img"); im.src = a.thumb; im.alt = ""; c.appendChild(im); }
+    const s = document.createElement("span"); s.textContent = (a.thumb ? "" : "📄 ") + a.name; c.appendChild(s);
+    const x = document.createElement("button"); x.textContent = "×"; x.setAttribute("aria-label", "شيل المرفق");
+    x.onclick = () => { atts.splice(i, 1); renderChips(); };
+    c.appendChild(x); chips.appendChild(c);
+  });
+  upd();
+}
+const b64len = () => atts.reduce((s, a) => s + a.data.length, 0);
+function fromImage(f) {
+  return new Promise((res, rej) => {
+    const url = URL.createObjectURL(f), img = new Image();
+    img.onload = () => {
+      const M = 1280; let w = img.naturalWidth, h = img.naturalHeight;
+      const k = Math.min(1, M / Math.max(w, h)); w = Math.round(w * k); h = Math.round(h * k);
+      const c = document.createElement("canvas"); c.width = w; c.height = h;
+      c.getContext("2d").drawImage(img, 0, 0, w, h);
+      const d = c.toDataURL("image/jpeg", 0.82);
+      URL.revokeObjectURL(url);
+      res({ type: "image", name: f.name || "صورة", data: d.split(",")[1], thumb: d });
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error("مقدرتش أقرا الصورة دي")); };
+    img.src = url;
+  });
+}
+function fromPdf(f) {
+  if (f.size > 4 * 1024 * 1024) return Promise.reject(new Error("ملف الـ PDF أكبر من 4 ميجا"));
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res({ type: "pdf", name: f.name, data: String(r.result).split(",")[1] });
+    r.onerror = () => rej(new Error("مقدرتش أقرا الملف"));
+    r.readAsDataURL(f);
+  });
+}
+async function fromText(f) {
+  if (f.size > 500 * 1024) throw new Error("الملف النصي أكبر من 500 كيلو");
+  const txt = await f.text();
+  if (txt.indexOf("\u0000") !== -1) throw new Error("نوع الملف ده مش مدعوم لسه");
+  return { type: "text", name: f.name, data: txt };
+}
+async function addFiles(list) {
+  for (const f of Array.from(list)) {
+    if (atts.length >= MAX_FILES) { note("أقصى حد " + MAX_FILES + " مرفقات في الرسالة"); break; }
+    try {
+      let a;
+      if (f.type.startsWith("image/")) a = await fromImage(f);
+      else if (f.type === "application/pdf" || /\.pdf$/i.test(f.name)) a = await fromPdf(f);
+      else a = await fromText(f);
+      if (b64len() + a.data.length > MAX_B64) { note("حجم المرفقات كبير. شيل واحد أو صغّرهم."); continue; }
+      atts.push(a);
+    } catch (e) { note(e.message || "مقدرتش أقرا الملف"); }
+  }
+  renderChips();
+}
+$("plus").onclick = e => { e.stopPropagation(); menu.hidden = !menu.hidden; };
+document.addEventListener("click", () => { menu.hidden = true; });
+const pick = { cam: $("fCam"), img: $("fImg"), file: $("fFile") };
+menu.querySelectorAll("button").forEach(b => { b.onclick = () => { pick[b.dataset.k].click(); menu.hidden = true; }; });
+Object.values(pick).forEach(inp => { inp.onchange = async () => { await addFiles(inp.files); inp.value = ""; }; });
+
+/* ---------- الإرسال ---------- */
+async function send() {
+  const x = t.value.trim();
+  if ((!x && !atts.length) || busy) return;
+  const tk = await getToken();
+  if (tk === null) { signOut(); return; }
+  busy = true; core.classList.add("busy");
+  const sending = atts.slice(); atts = []; renderChips();
+  t.value = ""; fit(); upd(); add("me", x, sending);
+  const w = add("ai", "...");
+  try {
+    const r = await fetch("/chat", { method: "POST", headers: authHeaders(),
+      body: JSON.stringify({ sid: SID, text: x, attachments: sending.map(a => ({ type: a.type, name: a.name, data: a.data })) }) });
+    const rd = r.body.getReader(), dec = new TextDecoder();
+    let full = "";
+    while (true) {
+      const { done, value } = await rd.read();
+      if (done) break;
+      full += dec.decode(value, { stream: true });
+      w.textContent = full; log.scrollTop = log.scrollHeight;
+    }
+    if (!full) w.textContent = "مفيش رد";
+    if (r.status === 401) { w.textContent = full || "سجّل دخولك الأول."; signOut(); }
+    else if (full && r.ok && sp.checked) {
+      const u = new SpeechSynthesisUtterance(full); u.lang = "ar-EG";
+      speechSynthesis.cancel(); speechSynthesis.speak(u);
+    }
+  } catch (e) { w.textContent = "مفيش اتصال بالسيرفر، أو الملفات كبيرة أوي."; }
+  busy = false; core.classList.remove("busy");
+}
+goBtn.onclick = send;
+$("clr").onclick = async () => {
+  await getToken();
+  try { await fetch("/reset", { method: "POST", headers: authHeaders(), body: JSON.stringify({ sid: SID }) }); } catch (e) {}
+  atts = []; renderChips(); log.innerHTML = ""; welcome();
+};
+
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+$("mic").onclick = () => {
+  if (!SR) { alert("المتصفح ده مش بيدعم التعرف على الصوت. استخدم Chrome."); return; }
+  const r = new SR(); r.lang = "ar-EG";
+  r.onresult = e => { t.value = e.results[0][0].transcript; fit(); upd(); send(); };
+  r.start();
+};
+
+if ("serviceWorker" in navigator) { navigator.serviceWorker.register("/sw.js").catch(() => {}); }
+
+/* ---------- البداية ---------- */
+(async () => {
+  try { CFG = await (await fetch("/config.json")).json(); } catch (e) {}
+  if (!CFG.authEnabled) { showApp(); return; }
+  if (await refreshTok()) showApp(); else showAuth();
+})();
+</script>
+</body>
+</html>
