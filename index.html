@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07131f">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<title>Jarvis AI</title>
+<style>
+  :root { --bg:#07131f; --ink:#d8f3ff; --dim:#6f93a8; --cyan:#3fd8ff; --line:#14405a; --card:#0d2a3d; --bar:#0b1f2f; }
+  * { box-sizing:border-box; }
+  html,body { height:100%; margin:0; }
+  body { background:var(--bg); color:var(--ink); font-family:system-ui,"Segoe UI",Tahoma,sans-serif;
+         display:flex; flex-direction:column; height:100dvh; padding-top:env(safe-area-inset-top,0px); }
+  header { display:flex; align-items:center; gap:12px; padding:10px 16px; border-bottom:1px solid var(--line); }
+  .core { width:34px; height:34px; border-radius:50%; border:2px solid var(--cyan); position:relative; flex:none; box-shadow:0 0 14px #3fd8ff66; }
+  .core::after { content:""; position:absolute; inset:9px; border-radius:50%; background:var(--cyan); }
+  .core.busy::after { animation:pulse .8s ease-in-out infinite; }
+  @keyframes pulse { 50% { transform:scale(1.5); opacity:.6; } }
+  @media (prefers-reduced-motion:reduce) { .core.busy::after { animation:none; } }
+  h1 { font-size:18px; margin:0; letter-spacing:.5px; flex:1; }
+  .tools { display:flex; align-items:center; gap:10px; }
+  label { display:flex; align-items:center; gap:4px; font-size:14px; color:var(--dim); }
+  #log { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px; }
+  .m { padding:10px 14px; border-radius:12px; max-width:88%; line-height:1.8; font-size:17px; white-space:pre-wrap; overflow-wrap:anywhere; }
+  .me { align-self:flex-start; background:var(--card); border:1px solid var(--line); }
+  .ai { align-self:flex-end; border:1px solid var(--cyan); }
+  .m img { display:block; max-width:100%; max-height:220px; border-radius:8px; margin-bottom:8px; }
+  .m .file { display:block; color:var(--cyan); font-size:15px; margin-bottom:6px; }
+  #note { min-height:0; padding:0 16px; font-size:14px; color:#ffb347; }
+  #chips { display:flex; gap:8px; padding:8px 12px 0; overflow-x:auto; background:var(--bar); }
+  #chips:empty { display:none; }
+  .chip { position:relative; flex:none; display:flex; align-items:center; gap:6px; padding:6px 10px; border:1px solid var(--line);
+          border-radius:10px; background:var(--bg); font-size:13px; max-width:180px; }
+  .chip img { width:40px; height:40px; object-fit:cover; border-radius:6px; }
+  .chip span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .chip button { padding:0 6px; background:transparent; color:#ff7b7b; font-size:18px; line-height:1; border:0; }
+  .bar { display:flex; gap:8px; padding:12px 12px calc(12px + env(safe-area-inset-bottom,0px)); background:var(--bar); align-items:center; }
+  .attach { position:relative; }
+  #menu { position:absolute; bottom:120%; inset-inline-start:0; display:flex; flex-direction:column; gap:6px; padding:8px;
+          background:var(--card); border:1px solid var(--cyan); border-radius:12px; z-index:5; min-width:150px; }
+  #menu[hidden] { display:none; }
+  #menu button { text-align:start; background:transparent; color:var(--ink); border:0; padding:10px 8px; font-weight:500; }
+  input[type=text] { flex:1; min-width:0; padding:12px; border-radius:10px; border:1px solid var(--line); background:var(--bg); color:var(--ink); font-size:16px; }
+  button { padding:12px 16px; border:0; border-radius:10px; background:var(--cyan); color:#032033; font-weight:700; font-size:16px; }
+  button.ghost { background:transparent; color:var(--cyan); border:1px solid var(--cyan); padding:6px 12px; font-size:14px; }
+  button:focus-visible, input:focus-visible { outline:3px solid #fff; outline-offset:2px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="core" id="core"></div>
+  <h1>Jarvis AI</h1>
+  <div class="tools">
+    <label><input id="sp" type="checkbox"> صوت</label>
+    <button id="clr" class="ghost">مسح</button>
+  </div>
+</header>
+<div id="log" aria-live="polite"></div>
+<div id="note"></div>
+<div id="chips"></div>
+<div class="bar">
+  <div class="attach">
+    <button id="plus" aria-label="إرفاق صورة أو ملف">＋</button>
+    <div id="menu" hidden>
+      <button data-k="cam">📷 كاميرا</button>
+      <button data-k="img">🖼️ صورة من المعرض</button>
+      <button data-k="file">📄 ملف (PDF أو نص)</button>
+    </div>
+  </div>
+  <button id="mic" aria-label="تحدث">🎤</button>
+  <input id="t" type="text" placeholder="اكتب لجارفيس..." autocomplete="off">
+  <button id="go">إرسال</button>
+</div>
+<input type="file" id="fCam" accept="image/*" capture="environment" hidden>
+<input type="file" id="fImg" accept="image/*" multiple hidden>
+<input type="file" id="fFile" accept=".pdf,.txt,.md,.csv,.json,.xml,.yaml,.yml,.log,.py,.js,.html,.css,text/*,application/pdf" multiple hidden>
+
+<script>
+const $ = id => document.getElementById(id);
+const log = $("log"), t = $("t"), sp = $("sp"), core = $("core"), chips = $("chips"), menu = $("menu");
+const MAX_FILES = 3, MAX_B64 = 7 * 1024 * 1024;
+let busy = false, atts = [];
+
+function sid() {
+  let s = "";
+  try { s = localStorage.getItem("jid") || ""; } catch (e) {}
+  if (!s) {
+    s = Math.random().toString(36).slice(2) + Date.now().toString(36);
+    try { localStorage.setItem("jid", s); } catch (e) {}
+  }
+  return s;
+}
+const SID = sid();
+
+function add(cls, text, files) {
+  const d = document.createElement("div");
+  d.className = "m " + cls;
+  (files || []).forEach(f => {
+    if (f.thumb) { const im = document.createElement("img"); im.src = f.thumb; im.alt = f.name; d.appendChild(im); }
+    else { const s = document.createElement("span"); s.className = "file"; s.textContent = "📄 " + f.name; d.appendChild(s); }
+  });
+  if (text) d.appendChild(document.createTextNode(text));
+  log.appendChild(d); log.scrollTop = log.scrollHeight;
+  return d;
+}
+
+function welcome() {
+  add("ai", "أهلاً بك في جارفيس، كيف يمكنني مساعدتك اليوم؟\nتم تطويري على يد المطور المبدع سيف إسلام، صاحب الفكرة والإصرار اللي حوّلني من حلم لحقيقة.\nتقدر تبعتلي صورة أو تصوّر بالكاميرا أو ترفع ملف PDF بزرار ＋.");
+}
+welcome();
+
+let noteTimer;
+function note(msg) {
+  $("note").textContent = msg;
+  clearTimeout(noteTimer);
+  noteTimer = setTimeout(() => { $("note").textContent = ""; }, 5000);
+}
+
+/* ---------- المرفقات ---------- */
+function renderChips() {
+  chips.innerHTML = "";
+  atts.forEach((a, i) => {
+    const c = document.createElement("div"); c.className = "chip";
+    if (a.thumb) { const im = document.createElement("img"); im.src = a.thumb; im.alt = ""; c.appendChild(im); }
+    const s = document.createElement("span"); s.textContent = (a.thumb ? "" : "📄 ") + a.name; c.appendChild(s);
+    const x = document.createElement("button"); x.textContent = "×"; x.setAttribute("aria-label", "شيل المرفق");
+    x.onclick = () => { atts.splice(i, 1); renderChips(); };
+    c.appendChild(x); chips.appendChild(c);
+  });
+}
+const b64len = () => atts.reduce((s, a) => s + a.data.length, 0);
+
+function fromImage(f) {
+  return new Promise((res, rej) => {
+    const url = URL.createObjectURL(f), img = new Image();
+    img.onload = () => {
+      const M = 1280; let w = img.naturalWidth, h = img.naturalHeight;
+      const k = Math.min(1, M / Math.max(w, h)); w = Math.round(w * k); h = Math.round(h * k);
+      const c = document.createElement("canvas"); c.width = w; c.height = h;
+      c.getContext("2d").drawImage(img, 0, 0, w, h);
+      const d = c.toDataURL("image/jpeg", 0.82);
+      URL.revokeObjectURL(url);
+      res({ type: "image", name: f.name || "صورة", data: d.split(",")[1], thumb: d });
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error("مقدرتش أقرا الصورة دي")); };
+    img.src = url;
+  });
+}
+function fromPdf(f) {
+  if (f.size > 4 * 1024 * 1024) return Promise.reject(new Error("ملف الـ PDF أكبر من 4 ميجا"));
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => res({ type: "pdf", name: f.name, data: String(r.result).split(",")[1] });
+    r.onerror = () => rej(new Error("مقدرتش أقرا الملف"));
+    r.readAsDataURL(f);
+  });
+}
+async function fromText(f) {
+  if (f.size > 500 * 1024) throw new Error("الملف النصي أكبر من 500 كيلو");
+  const txt = await f.text();
+  if (txt.indexOf("\u0000") !== -1) throw new Error("نوع الملف ده مش مدعوم لسه");
+  return { type: "text", name: f.name, data: txt };
+}
+async function addFiles(list) {
+  for (const f of Array.from(list)) {
+    if (atts.length >= MAX_FILES) { note("أقصى حد " + MAX_FILES + " مرفقات في الرسالة"); break; }
+    try {
+      let a;
+      if (f.type.startsWith("image/")) a = await fromImage(f);
+      else if (f.type === "application/pdf" || /\.pdf$/i.test(f.name)) a = await fromPdf(f);
+      else a = await fromText(f);
+      if (b64len() + a.data.length > MAX_B64) { note("حجم المرفقات كبير. شيل واحد أو صغّرهم."); continue; }
+      atts.push(a);
+    } catch (e) { note(e.message || "مقدرتش أقرا الملف"); }
+  }
+  renderChips();
+}
+$("plus").onclick = e => { e.stopPropagation(); menu.hidden = !menu.hidden; };
+document.addEventListener("click", () => { menu.hidden = true; });
+const pick = { cam: $("fCam"), img: $("fImg"), file: $("fFile") };
+menu.querySelectorAll("button").forEach(b => { b.onclick = () => { pick[b.dataset.k].click(); menu.hidden = true; }; });
+Object.values(pick).forEach(inp => { inp.onchange = async () => { await addFiles(inp.files); inp.value = ""; }; });
+
+/* ---------- الإرسال ---------- */
+async function send() {
+  const x = t.value.trim();
+  if ((!x && !atts.length) || busy) return;
+  busy = true; core.classList.add("busy");
+  const sending = atts.slice(); atts = []; renderChips();
+  t.value = ""; add("me", x, sending);
+  const w = add("ai", "...");
+  try {
+    const r = await fetch("/chat", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sid: SID, text: x, attachments: sending.map(a => ({ type: a.type, name: a.name, data: a.data })) }) });
+    const rd = r.body.getReader(), dec = new TextDecoder();
+    let full = "";
+    while (true) {
+      const { done, value } = await rd.read();
+      if (done) break;
+      full += dec.decode(value, { stream: true });
+      w.textContent = full; log.scrollTop = log.scrollHeight;
+    }
+    if (!full) w.textContent = "مفيش رد";
+    if (full && r.ok && sp.checked) {
+      const u = new SpeechSynthesisUtterance(full); u.lang = "ar-EG";
+      speechSynthesis.cancel(); speechSynthesis.speak(u);
+    }
+  } catch (e) { w.textContent = "مفيش اتصال بالسيرفر، أو الملفات كبيرة أوي."; }
+  busy = false; core.classList.remove("busy");
+}
+$("go").onclick = send;
+t.addEventListener("keydown", e => { if (e.key === "Enter") send(); });
+$("clr").onclick = async () => {
+  try { await fetch("/reset", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ sid: SID }) }); } catch (e) {}
+  atts = []; renderChips(); log.innerHTML = ""; welcome();
+};
+
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+$("mic").onclick = () => {
+  if (!SR) { alert("المتصفح ده مش بيدعم التعرف على الصوت. استخدم Chrome."); return; }
+  const r = new SR(); r.lang = "ar-EG";
+  r.onresult = e => { t.value = e.results[0][0].transcript; send(); };
+  r.start();
+};
+
+if ("serviceWorker" in navigator) { navigator.serviceWorker.register("/sw.js").catch(() => {}); }
+</script>
+</body>
+</html>
