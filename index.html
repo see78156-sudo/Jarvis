@@ -133,6 +133,73 @@
   #amsg { min-height:22px; font-size:14px; line-height:1.6; color:#ff8a8a; }
   #amsg.ok { color:#6fe3a0; }
   .by { margin:0; color:var(--dim); font-size:12px; }
+
+  /* ===== تصميم الشاشة الجديد ===== */
+  :root { --bg:#02060f; --bar:#06101f; --card:#0a1d36; }
+  body { background:radial-gradient(ellipse 90% 50% at 50% 28%, #0b2f7a44 0%, transparent 70%),
+                    radial-gradient(ellipse 60% 40% at 100% 100%, #1b5cff33 0%, transparent 70%),
+                    radial-gradient(ellipse 60% 40% at 0% 85%, #1b5cff2a 0%, transparent 70%), var(--bg); }
+  header { border-bottom:0; padding:10px 14px 6px; gap:6px; background:transparent; }
+  #burger { visibility:hidden; display:grid; }
+  @media (max-width:860px) { #burger { visibility:visible; } }
+  .hbtn { background:transparent; border:0; color:var(--cyan); width:46px; height:46px; filter:drop-shadow(0 0 6px #3fd8ff99); }
+  h1 { flex:1; text-align:center; font-size:30px; font-style:italic; font-weight:800; letter-spacing:.3px; direction:ltr; text-shadow:0 0 18px #3fd8ff66; }
+  h1 .hj { background:linear-gradient(180deg,#fff 20%,#a9dcff); -webkit-background-clip:text; background-clip:text; color:transparent; text-shadow:none; }
+  h1 .ha { color:#38c6ff; }
+  .hline { height:2px; margin:0 14%; background:linear-gradient(90deg,transparent,#3fd8ff,transparent); box-shadow:0 0 14px #3fd8ff; border-radius:2px; }
+  .hline.busy { animation:sweep 1s ease-in-out infinite; }
+  .hline.small { margin:6px 20% 0; width:60%; }
+  @keyframes sweep { 50% { opacity:.3; transform:scaleX(.5); } }
+
+  #main.blank #log { display:none; }
+  #main:not(.blank) #hero { display:none; }
+  #hero { flex:1; min-height:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; padding:6px 20px; text-align:center; overflow:hidden; }
+  .holo { position:relative; width:min(66vw,300px); height:min(56vw,260px); flex:none; }
+  .orb3d { position:absolute; left:50%; top:4%; width:54%; aspect-ratio:1; transform:translateX(-50%); border-radius:50%;
+           background:radial-gradient(circle at 35% 30%, #8fe3ff55, #1b5cff22 48%, transparent 72%);
+           border:2px solid #7fe6ff; box-shadow:0 0 46px #2b7bffcc, inset 0 0 34px #3fd8ff77; animation:float 4s ease-in-out infinite; }
+  .orb3d i { position:absolute; inset:-30%; border-radius:50%; border:2px solid #2b7bff44; border-top-color:#3fd8ff; border-right-color:#3fd8ff99;
+             filter:drop-shadow(0 0 6px #3fd8ff); animation:ringA 6s linear infinite; }
+  .orb3d i:nth-child(2) { inset:-44%; border-color:#3fd8ff33; border-top-color:#2b7bff; border-left-color:#2b7bffaa; animation:ringB 9s linear infinite; }
+  .orb3d i:nth-child(3) { inset:-16%; border-width:1.5px; animation:ringC 4.5s linear infinite; }
+  @keyframes ringA { from { transform:rotate(0) scaleY(.38); } to { transform:rotate(360deg) scaleY(.38); } }
+  @keyframes ringB { from { transform:rotate(180deg) scaleY(.26); } to { transform:rotate(-180deg) scaleY(.26); } }
+  @keyframes ringC { from { transform:rotate(60deg) scaleY(.6); } to { transform:rotate(420deg) scaleY(.6); } }
+  @keyframes float { 50% { transform:translateX(-50%) translateY(-8px); } }
+  .beam { position:absolute; left:50%; top:60%; width:5px; height:24%; transform:translateX(-50%); background:linear-gradient(#3fd8ff,transparent); filter:blur(1px); }
+  .plat { position:absolute; left:50%; bottom:0; width:100%; height:30%; transform:translateX(-50%); }
+  .plat i { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); border:2px solid #3fd8ffaa; border-radius:50%; box-shadow:0 0 14px #2b7bff99; animation:glowp 3s ease-in-out infinite; }
+  .plat i:nth-child(1) { width:100%; height:100%; }
+  .plat i:nth-child(2) { width:76%; height:76%; animation-delay:.3s; }
+  .plat i:nth-child(3) { width:52%; height:52%; animation-delay:.6s; }
+  .plat i:nth-child(4) { width:28%; height:28%; animation-delay:.9s; }
+  @keyframes glowp { 50% { opacity:.45; } }
+  .hello { padding:9px 24px; border:1.5px solid #3fd8ff; border-radius:999px; background:#06142a99; box-shadow:0 0 18px #2b7bff77; font-size:19px; }
+  .ask { margin:4px 0 0; font-size:clamp(26px,7.5vw,42px); font-weight:800; line-height:1.4; }
+  .ask span { color:#38b6ff; display:block; }
+  .hby { margin:2px 0 0; color:var(--dim); font-size:13px; }
+  @media (prefers-reduced-motion:reduce) { .orb3d, .orb3d i, .plat i, .hline.busy { animation:none !important; } }
+
+  .m { backdrop-filter:blur(2px); }
+  .me { background:#0a1d3699; border-color:#2b7bff77; }
+  .ai { border-color:#3fd8ff99; box-shadow:0 0 14px #3fd8ff22; }
+
+  .wrap { padding:6px 12px calc(12px + env(safe-area-inset-bottom,0px)); }
+  .composer { max-width:780px; margin:0 auto; border-radius:34px; padding:8px; border:1.5px solid #2b7bff;
+              background:linear-gradient(180deg,#071426,#050d1c);
+              box-shadow:0 0 0 1px #3fd8ff33, 0 0 26px #2b7bff66, inset 0 0 18px #2b7bff22; }
+  .composer:focus-within { border-color:#3fd8ff; box-shadow:0 0 0 1px #3fd8ff66, 0 0 34px #3fd8ff66, inset 0 0 20px #2b7bff33; }
+  #chips { padding:4px 6px 8px; }
+  .crow { display:flex; align-items:flex-end; gap:6px; }
+  .crow textarea { flex:1; min-width:0; padding:12px 6px; }
+  .crow .ic, .crow .send { width:46px; height:46px; }
+  .ic.plus { border:1.5px solid #3fd8ff; background:#06182e; box-shadow:0 0 14px #3fd8ff66, inset 0 0 10px #3fd8ff33; }
+  .ic.mic { border-color:transparent; color:#8fc8e6; }
+  .ic.wave { border-color:transparent; background:transparent; color:var(--cyan); box-shadow:none; filter:drop-shadow(0 0 6px #3fd8ffaa); }
+  .send { margin-inline-start:0; background:linear-gradient(135deg,var(--cyan),var(--blue)); color:#032033; box-shadow:0 0 16px #3fd8ff66; }
+  #menu { bottom:130%; }
+  .crow textarea:focus-visible { outline:none; }
+  .vcard label.chk { flex-direction:row; align-items:center; gap:8px; }
 </style>
 </head>
 <body>
@@ -168,25 +235,35 @@
   </aside>
   <div id="main">
   <header>
-    <button id="burger" class="ic" aria-label="المحادثات">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    <button id="burger" class="ic hbtn" aria-label="المحادثات">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h11"/></svg>
     </button>
-    <div class="core" id="core"></div>
-    <h1>Jarvis AI</h1>
-    <div class="tools">
-      <label><input id="sp" type="checkbox"> صوت</label>
-    </div>
+    <h1><span class="hj">Jarvis</span> <span class="ha">AI</span></h1>
+    <button id="gear" class="ic hbtn" aria-label="إعدادات الصوت">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1"/></svg>
+    </button>
   </header>
+  <div class="hline" id="core"></div>
+  <div id="hero">
+    <div class="holo" aria-hidden="true">
+      <div class="orb3d"><i></i><i></i><i></i></div>
+      <div class="beam"></div>
+      <div class="plat"><i></i><i></i><i></i><i></i></div>
+    </div>
+    <div class="hello">أهلاً يا فندم 👋</div>
+    <h2 class="ask">كيف أقدر <span>أساعدك النهاردة؟</span></h2>
+    <div class="hline small"></div>
+    <p class="hby">تطوير سيف إسلام</p>
+  </div>
   <div id="log" aria-live="polite"></div>
   <div id="note"></div>
   <div class="wrap">
     <div class="composer">
       <div id="chips"></div>
-      <textarea id="t" rows="1" placeholder="اسأل جارفيس..." enterkeyhint="send" autocomplete="off"></textarea>
-      <div class="row">
+      <div class="crow">
         <div class="attach">
-          <button id="plus" class="ic" aria-label="إرفاق صورة أو ملف">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          <button id="plus" class="ic plus" aria-label="إرفاق صورة أو ملف">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
           </button>
           <div id="menu" hidden>
             <button data-k="cam">📷 كاميرا</button>
@@ -194,13 +271,14 @@
             <button data-k="file">📄 ملف (PDF أو نص)</button>
           </div>
         </div>
-        <button id="mic" class="ic" aria-label="تحدث">
+        <textarea id="t" rows="1" placeholder="اسأل أي حاجة..." enterkeyhint="send" autocomplete="off"></textarea>
+        <button id="mic" class="ic mic" aria-label="تحدث">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/><path d="M19 11a7 7 0 0 1-14 0M12 18v3"/></svg>
         </button>
-        <button id="liveBtn" class="ic live" type="button" aria-label="محادثة صوتية مباشرة">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 10v4M8 7v10M12 4v16M16 7v10M20 10v4"/></svg>
+        <button id="liveBtn" class="ic wave" type="button" aria-label="محادثة صوتية مباشرة">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 10v4M8 7v10M12 4v16M16 7v10M20 10v4"/></svg>
         </button>
-        <button id="go" class="send" aria-label="إرسال">
+        <button id="go" class="send" aria-label="إرسال" hidden>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
         </button>
       </div>
@@ -222,6 +300,7 @@
 <div id="vset" hidden>
   <div class="vcard">
     <h3>إعدادات الصوت</h3>
+    <label class="chk"><input id="sp" type="checkbox"> اقرا الردود بصوت عالي</label>
     <label>صوت الرد بالعربي<select id="vAr"></select></label>
     <label>صوت الرد بالإنجليزي<select id="vEn"></select></label>
     <label>نبرة الصوت (أقل = أتخن)<input id="vPitch" type="range" min="0.5" max="1.5" step="0.05"></label>
@@ -464,7 +543,7 @@ async function openChat(id) {
     const rec = await store.get(id);
     if (!rec) throw new Error("none");
     cur = { id: id, title: rec.title || "", msgs: rec.msgs || [] };
-    atts = []; renderChips(); renderMsgs(); renderList();
+    atts = []; renderChips(); renderMsgs(); renderList(); $("main").classList.toggle("blank", !cur.msgs.length);
   } catch (e) { note("مقدرتش أفتح المحادثة دي."); }
 }
 async function deleteChat(id) {
@@ -496,9 +575,7 @@ function add(cls, text, files) {
   log.appendChild(d); log.scrollTop = log.scrollHeight;
   return d;
 }
-function welcome() {
-  add("ai", "أهلاً بك في جارفيس، كيف يمكنني مساعدتك اليوم؟\nتم تطويري على يد المطور المبدع سيف إسلام، صاحب الفكرة والإصرار اللي حوّلني من حلم لحقيقة.\nتقدر تبعتلي صورة أو تصوّر بالكاميرا أو ترفع ملف PDF بزرار ＋.");
-}
+function welcome() { $("main").classList.add("blank"); }
 let noteTimer;
 function note(msg) {
   $("note").textContent = msg;
@@ -508,7 +585,7 @@ function note(msg) {
 
 /* ---------- صندوق الكتابة ---------- */
 function fit() { t.style.height = "auto"; t.style.height = Math.min(t.scrollHeight, 140) + "px"; }
-function upd() { goBtn.classList.toggle("on", !!(t.value.trim() || atts.length)); }
+function upd() { const has = !!(t.value.trim() || atts.length); goBtn.hidden = !has; $("liveBtn").hidden = has; }
 t.addEventListener("input", () => { fit(); upd(); });
 t.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } });
 
@@ -583,7 +660,7 @@ async function send() {
   if ((!x && !atts.length) || busy) return;
   const tk = await getToken();
   if (tk === null) { signOut(); return; }
-  busy = true; core.classList.add("busy");
+  busy = true; core.classList.add("busy"); $("main").classList.remove("blank");
   const sending = atts.slice(); atts = []; renderChips();
   const history = cur.msgs.slice(-20).map(m => ({ role: m.r === "user" ? "user" : "model",
     text: m.t || ("[مرفقات: " + (m.f || []).join("، ") + "]") }));
@@ -699,7 +776,7 @@ if ("speechSynthesis" in window) speechSynthesis.onvoiceschanged = fillVoices;
 function openVset() {
   fillVoices(); $("vPitch").value = vs.pitch; $("vRate").value = vs.rate; $("vListen").value = vs.listen; $("vset").hidden = false;
 }
-$("vbtn").onclick = openVset; $("lvoice").onclick = openVset;
+$("vbtn").onclick = openVset; $("lvoice").onclick = openVset; $("gear").onclick = openVset;
 $("vClose").onclick = () => { $("vset").hidden = true; };
 $("vAr").onchange = () => { vs.ar = $("vAr").value; saveVs(); };
 $("vEn").onchange = () => { vs.en = $("vEn").value; saveVs(); };
