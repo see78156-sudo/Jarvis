@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#02060f">
+<meta name="color-scheme" content="dark">
+<title>Jarvis AI — مساعدك الذكي بالعربي</title>
+<meta name="description" content="Jarvis AI مساعد ذكي بالعربي: يشوف الصور ويقرا الملفات ويكلمك بصوته. افتحه من المتصفح أو حمّله على أندرويد وآيفون.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Jarvis AI — مساعدك الذكي بالعربي">
+<meta property="og:description" content="اسأله، ابعتله صورة، أو كلّمه بصوتك. افتحه من المتصفح أو حمّله على أندرويد وآيفون.">
+<meta property="og:image" content="https://jarvis-wbng.onrender.com/icon-512.png">
+<meta property="og:url" content="https://jarvis-wbng.onrender.com/download">
+<meta name="twitter:card" content="summary">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<style>
+  :root { color-scheme:dark; --bg:#02060f; --ink:#d8f3ff; --dim:#7fa3b8; --cyan:#3fd8ff; --blue:#2b7bff; --line:#14405a; --card:#06142a; }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { margin:0; color:var(--ink); font-family:system-ui,"Segoe UI",Tahoma,sans-serif; line-height:1.7;
+         background:radial-gradient(ellipse 90% 40% at 50% 12%, #0b2f7a55 0%, transparent 70%),
+                    radial-gradient(ellipse 60% 35% at 100% 60%, #1b5cff2a 0%, transparent 70%),
+                    radial-gradient(ellipse 60% 35% at 0% 90%, #1b5cff2a 0%, transparent 70%), var(--bg);
+         padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px); }
+  .wrap { max-width:960px; margin:0 auto; padding:0 18px 40px; }
+  .top { display:flex; align-items:center; justify-content:center; padding:16px 0 4px; }
+  .brand { font-size:26px; font-weight:800; font-style:italic; direction:ltr; text-shadow:0 0 18px #3fd8ff66; }
+  .brand b { color:#38c6ff; }
+  .hline { height:2px; margin:6px 18% 0; background:linear-gradient(90deg,transparent,var(--cyan),transparent); box-shadow:0 0 14px var(--cyan); border-radius:2px; }
+
+  .hero { text-align:center; padding:12px 0 8px; }
+  .holo { position:relative; width:200px; height:190px; margin:8px auto 0; }
+  .orb3d { position:absolute; left:50%; top:3%; width:56%; aspect-ratio:1; transform:translateX(-50%); border-radius:50%;
+           background:radial-gradient(circle at 35% 30%, #8fe3ff55, #1b5cff22 48%, transparent 72%); border:2px solid #7fe6ff;
+           box-shadow:0 0 46px #2b7bffcc, inset 0 0 34px #3fd8ff77; animation:float 4s ease-in-out infinite; }
+  .orb3d i { position:absolute; inset:-30%; border-radius:50%; border:2px solid #2b7bff44; border-top-color:var(--cyan); border-right-color:#3fd8ff99;
+             filter:drop-shadow(0 0 6px var(--cyan)); animation:ringA 6s linear infinite; }
+  .orb3d i:nth-child(2) { inset:-44%; border-color:#3fd8ff33; border-top-color:var(--blue); border-left-color:#2b7bffaa; animation:ringB 9s linear infinite; }
+  @keyframes ringA { from { transform:rotate(0) scaleY(.38); } to { transform:rotate(360deg) scaleY(.38); } }
+  @keyframes ringB { from { transform:rotate(180deg) scaleY(.26); } to { transform:rotate(-180deg) scaleY(.26); } }
+  @keyframes float { 50% { transform:translateX(-50%) translateY(-7px); } }
+  .plat { position:absolute; left:50%; bottom:0; width:100%; height:30%; transform:translateX(-50%); }
+  .plat i { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); border:2px solid #3fd8ffaa; border-radius:50%; box-shadow:0 0 14px #2b7bff99; }
+  .plat i:nth-child(1) { width:100%; height:100%; } .plat i:nth-child(2) { width:72%; height:72%; } .plat i:nth-child(3) { width:44%; height:44%; }
+  h1 { margin:10px 0 4px; font-size:clamp(34px,9vw,54px); font-weight:800; line-height:1.25; }
+  h1 span { color:#38b6ff; }
+  .lead { margin:0 auto 18px; max-width:560px; color:var(--dim); font-size:18px; }
+  .cta { display:inline-flex; align-items:center; gap:10px; padding:16px 34px; border-radius:999px; font-size:20px; font-weight:800; text-decoration:none;
+         color:#032033; background:linear-gradient(135deg,var(--cyan),var(--blue)); box-shadow:0 0 26px #3fd8ff77; }
+  .cta:active { transform:scale(.98); }
+  .hint { margin:10px 0 0; color:var(--dim); font-size:14px; }
+
+  h2 { text-align:center; font-size:26px; margin:38px 0 14px; }
+  .cards { display:grid; grid-template-columns:1fr; gap:16px; }
+  @media (min-width:760px) { .cards { grid-template-columns:1fr 1fr; } }
+  .card { background:linear-gradient(180deg,#071a36,#050f22); border:1.5px solid #2b7bff88; border-radius:24px; padding:20px;
+          box-shadow:0 0 22px #2b7bff33, inset 0 0 18px #2b7bff14; display:flex; flex-direction:column; gap:10px; }
+  .android .card.a { order:-1; } .ios .card.i { order:-1; }
+  .card h3 { margin:0; font-size:22px; display:flex; align-items:center; gap:10px; }
+  .badge { display:none; font-size:12px; font-weight:700; background:var(--cyan); color:#032033; padding:2px 10px; border-radius:999px; }
+  .android .card.a .badge, .ios .card.i .badge { display:inline-block; }
+  ol { margin:0; padding-inline-start:22px; color:#cfe9f7; font-size:16px; }
+  ol li { margin:4px 0; }
+  .btn { display:inline-flex; justify-content:center; align-items:center; gap:8px; padding:14px 20px; border-radius:14px; border:0; cursor:pointer; font-size:17px; font-weight:700;
+         text-decoration:none; color:#032033; background:linear-gradient(135deg,var(--cyan),var(--blue)); box-shadow:0 0 16px #3fd8ff55; }
+  .btn.ghost { background:transparent; color:var(--cyan); border:1.5px solid var(--cyan); box-shadow:none; }
+  .btn[hidden], [hidden] { display:none !important; }
+  .note { margin:0; color:var(--dim); font-size:13.5px; }
+  .warn { margin:0; padding:10px 12px; border:1px solid #ffb34788; border-radius:12px; background:#2a1c0644; color:#ffd08a; font-size:14px; }
+  .ico { flex:none; width:28px; height:28px; }
+
+  .qr { display:none; text-align:center; margin-top:26px; }
+  @media (hover:hover) and (min-width:900px) { .qr { display:block; } }
+  .qr img { width:200px; height:200px; border-radius:20px; border:3px solid var(--cyan); box-shadow:0 0 24px #3fd8ff66; background:#fff; }
+  .qr p { margin:8px 0 0; color:var(--dim); }
+
+  .feats { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media (min-width:760px) { .feats { grid-template-columns:repeat(4,1fr); } }
+  .feat { text-align:center; padding:16px 10px; border:1px solid var(--line); border-radius:18px; background:#06142a99; font-size:15px; }
+  .feat b { display:block; font-size:28px; margin-bottom:4px; }
+
+  .by { text-align:center; margin:36px 0 0; padding:18px; border:1px solid var(--line); border-radius:20px; background:#06142a88; }
+  .by strong { color:var(--cyan); font-size:20px; }
+  footer { text-align:center; color:var(--dim); font-size:13px; margin-top:22px; }
+  @media (prefers-reduced-motion:reduce) { .orb3d, .orb3d i { animation:none !important; } }
+  a:focus-visible, button:focus-visible { outline:3px solid #fff; outline-offset:3px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><div class="brand">Jarvis <b>AI</b></div></div>
+  <div class="hline"></div>
+
+  <section class="hero">
+    <div class="holo" aria-hidden="true"><div class="orb3d"><i></i><i></i></div><div class="plat"><i></i><i></i><i></i></div></div>
+    <h1>مساعدك الذكي <span>بالعربي</span></h1>
+    <p class="lead">اسأله أي حاجة، ابعتله صورة أو ملف، أو كلّمه بصوتك وهو يرد عليك.</p>
+    <a class="cta" href="/" id="openBtn">افتح جارفيس الآن ←</a>
+    <p class="hint">من غير تحميل. بيشتغل من أي متصفح.</p>
+  </section>
+
+  <h2>حمّله على موبايلك</h2>
+  <div class="cards" id="cards">
+    <section class="card a" id="cardAndroid">
+      <h3>
+        <svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><path fill="#3ddc84" d="M10 22a14 14 0 0 1 28 0zM12 24h24v14a3 3 0 0 1-3 3H15a3 3 0 0 1-3-3zM5 24a2.5 2.5 0 0 1 5 0v10a2.5 2.5 0 0 1-5 0zM38 24a2.5 2.5 0 0 1 5 0v10a2.5 2.5 0 0 1-5 0zM17 39h4v5a2 2 0 0 1-4 0zM27 39h4v5a2 2 0 0 1-4 0z"/></svg>
+        أندرويد <span class="badge">ده جهازك</span>
+      </h3>
+      <a class="btn" id="apkBtn" href="#">⬇ حمّل التطبيق (APK)</a>
+      <button class="btn ghost" id="pwaBtn" hidden>＋ ثبّته من المتصفح (من غير ملف)</button>
+      <ol>
+        <li>دوس على «حمّل التطبيق» وانتظر التحميل.</li>
+        <li>افتح الملف اللي نزل ودوس <b>تثبيت</b>.</li>
+        <li>لو طلب السماح بالتثبيت من المتصفح، فعّله وارجع.</li>
+        <li>لو ظهر تحذير Play Protect، دوس <b>تثبيت على أي حال</b>.</li>
+      </ol>
+      <p class="note" id="apkNote">التطبيق مش على Google Play، عشان كده ممكن يظهر تحذير أمان عادي.</p>
+    </section>
+
+    <section class="card i" id="cardIos">
+      <h3>
+        <svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><path fill="#f3f6fa" d="M33.4 25.4c0-4.6 3.8-6.8 4-6.9-2.2-3.2-5.6-3.6-6.8-3.7-2.9-.3-5.6 1.7-7.1 1.7-1.5 0-3.7-1.7-6.1-1.6-3.1 0-6 1.8-7.6 4.6-3.3 5.7-.8 14 2.3 18.6 1.5 2.2 3.4 4.7 5.8 4.6 2.3-.1 3.2-1.5 6-1.5 2.8 0 3.6 1.5 6.1 1.4 2.5 0 4.1-2.3 5.6-4.5 1.8-2.6 2.5-5.1 2.5-5.2-.1 0-4.7-1.8-4.7-7.5zM28.9 11.8c1.3-1.5 2.1-3.7 1.9-5.8-1.8.1-4 1.2-5.3 2.7-1.2 1.3-2.2 3.5-1.9 5.6 2 .2 4.1-1 5.3-2.5z"/></svg>
+        آيفون <span class="badge">ده جهازك</span>
+      </h3>
+      <p class="warn" id="iosWarn" hidden>إنت مش فاتح من Safari. انسخ الرابط وافتحه من Safari عشان الإضافة تشتغل.</p>
+      <ol>
+        <li>افتح الموقع من <b>Safari</b> (مش Chrome).</li>
+        <li>دوس على زرار <b>المشاركة</b>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3fd8ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px"><path d="M12 15V3M8 7l4-4 4 4M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>
+          اللي تحت.</li>
+        <li>اختار <b>إضافة إلى الشاشة الرئيسية</b>.</li>
+        <li>دوس <b>إضافة</b>، وهتلاقي أيقونة جارفيس على الشاشة.</li>
+      </ol>
+      <button class="btn ghost" id="copyBtn">📋 انسخ الرابط</button>
+      <p class="note">مفيش تطبيق على App Store، بس بالطريقة دي بيشتغل زي التطبيق بالظبط.</p>
+    </section>
+  </div>
+
+  <div class="qr" id="qr">
+    <h2 style="margin-top:30px">أو افتحه من موبايلك</h2>
+    <img src="/qr.png" alt="كود QR لفتح صفحة تحميل جارفيس" width="200" height="200">
+    <p>امسح الكود بكاميرا الموبايل</p>
+  </div>
+
+  <h2>إيه اللي يقدر يعمله؟</h2>
+  <div class="feats">
+    <div class="feat"><b>🖼️</b>يشوف الصور<br>ويشرحها</div>
+    <div class="feat"><b>📄</b>يقرا ملفات<br>PDF والنصوص</div>
+    <div class="feat"><b>🎧</b>محادثة صوتية<br>بصوته</div>
+    <div class="feat"><b>💬</b>بيحفظ محادثاتك<br>على حسابك</div>
+  </div>
+
+  <div class="by">من صنع وتطوير<br><strong>سيف إسلام</strong><br>شاب عربي</div>
+  <footer>© Jarvis AI</footer>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const ua = navigator.userAgent || "";
+const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+const isAndroid = /Android/i.test(ua);
+document.body.classList.add(isIOS ? "ios" : isAndroid ? "android" : "desk");
+
+// لو فاتحه من التطبيق المثبّت، ودّيه للشات على طول
+if (window.matchMedia("(display-mode: standalone)").matches || navigator.standalone) location.replace("/");
+
+// رابط تحميل الـ APK: من السيرفر لو الملف موجود، وإلا من GitHub
+const GH = "https://github.com/see78156-sudo/Jarvis/releases/latest";
+$("apkBtn").href = GH;
+fetch("/config.json").then(r => r.json()).then(c => {
+  if (c.apk) { $("apkBtn").href = "/jarvis.apk"; $("apkBtn").setAttribute("download", "Jarvis-AI.apk"); }
+  else { $("apkNote").textContent = "هيفتحلك صفحة التحميل على GitHub. دوس على ملف APK في آخر الصفحة."; }
+}).catch(() => {});
+
+// iPhone: تنبيه لو مش في Safari
+if (isIOS && /CriOS|FxiOS|EdgiOS|OPiOS|FBAN|FBAV|Instagram|Line\//.test(ua)) $("iosWarn").hidden = false;
+
+// نسخ الرابط
+$("copyBtn").onclick = async () => {
+  const url = location.origin + "/";
+  try { await navigator.clipboard.writeText(url); $("copyBtn").textContent = "اتنسخ ✓"; }
+  catch (e) { window.prompt("انسخ الرابط:", url); }
+};
+
+// تثبيت من المتصفح على أندرويد (من غير ملف)
+let deferred = null;
+window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); deferred = e; $("pwaBtn").hidden = false; });
+$("pwaBtn").onclick = async () => { if (!deferred) return; deferred.prompt(); await deferred.userChoice; deferred = null; $("pwaBtn").hidden = true; };
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => {});
+</script>
+</body>
+</html>
